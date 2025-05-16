@@ -77,6 +77,8 @@
   { assetOwner: principal, assetId: uint }
   { yes: uint, no: uint })
 
+
+
 ;; public functions
 ;;
 ;; transfer allowed only by sender
@@ -98,7 +100,7 @@
     (unwrap! (ft-transfer? PXT amount tx-sender (as-contract tx-sender)) (err ERR_INSUFFICIENT_STAKE))
     (let (
       (prev (map-get? Stakes {staker: tx-sender}))
-      (now (unwrap! (get-current-ts) (err ERR_NO_TIME_GOT)))
+      (now stacks-block-height)
     )
     (if (is-some prev)
       (let (
@@ -114,7 +116,7 @@
 (define-public (withdraw-stake)
   (let (
           (stake (unwrap! (map-get? Stakes {staker: tx-sender}) (err ERR_INSUFFICIENT_STAKE)))
-          (now (unwrap! (get-current-ts) (err ERR_NO_TIME_GOT)))
+          (now stacks-block-height)
           (lock-end (+ (get stakedAt stake) STAKE_LOCK_PERIOD)))
     (asserts! (>= now lock-end) (err ERR_VOTING_EXPIRED))
     (let ((amount (get amount stake)))
@@ -126,16 +128,18 @@
 
 ;; submit asset for tokenization with timestamp
 (define-public (add-for-tokenization 
-                 (assetOwner principal) 
+                 
                  (assetId     uint) 
                  (name        (string-utf8 120)) 
                  (amount      uint) 
                  (ipfsData    (string-utf8 120)))
   (begin
-    (let ((ts (unwrap! (get-current-ts) 
-                       (err ERR_VOTING_EXPIRED))))     ;; now ts is a uint
+    (let ((ts stacks-block-height)
+          (approved-kyc (unwrap-panic (map-get? KYC {user: tx-sender})))
+      )     ;; now ts is a uint
+      (asserts! (is-eq true (get processCompleted approved-kyc)) (err 100))
       (map-insert Assets 
-                  { owner:    assetOwner,
+                  { owner:    tx-sender,
                     assetId:  assetId }
                   { name:             name,
                     amount:           amount,
@@ -155,7 +159,7 @@
       ;; within voting window
       (let ((asset (unwrap! (map-get? Assets {owner: assetOwner, assetId: assetId}) (err ERR_TOKEN_NOT_FOUND)))
              (creation (get createdAt asset))
-             (now (unwrap! (get-current-ts) (err ERR_NO_TIME_GOT))))
+             (now stacks-block-height))
         (asserts! (< now (+ creation MAX_VOTE_DURATION)) (err ERR_VOTING_EXPIRED)))
       ;; haven't voted
       (asserts! (is-none (map-get? TokenVotes {assetOwner: assetOwner, assetId: assetId, voter: voter})) (err ERR_ALREADY_VOTED))
@@ -177,7 +181,7 @@
            (yesVotes (get yes counts))
            (noVotes (get no counts))
            (total (+ yesVotes noVotes))
-           (now (unwrap! (get-current-ts) (err ERR_NO_TIME_GOT)))
+           (now stacks-block-height)
            (creation (get createdAt asset)))
       ;; enforce time limit
       (asserts! (< now (+ creation MAX_VOTE_DURATION)) (err ERR_VOTING_EXPIRED))
@@ -193,10 +197,18 @@
       (ok true))))
 
 ;; KYC process completion
+(define-public (kyc (user principal) (ipfsData (string-utf8 120)))
+  (begin
+    (map-set KYC {user: user} {processCompleted: false, ipfsData: ipfsData})
+    (ok true)))
+
 (define-public (complete-kyc (user principal) (ipfsData (string-utf8 120)))
   (begin
+    (asserts! (is-eq tx-sender (var-get tokenAdmin)) (err ERR_NOT_ADMIN))
     (map-set KYC {user: user} {processCompleted: true, ipfsData: ipfsData})
     (ok true)))
+
+
 
 ;; read only functions
 ;;
@@ -225,10 +237,14 @@
   (ok (ft-get-supply PXT))
 )
 
+(define-read-only (get-asset (a-owner principal) (a-id uint))
+  (ok (map-get? Assets {owner: a-owner, assetId: a-id}))
+)
+
 ;; private functions
 ;;
 
 ;; util: fetch current UNIX timestamp
-(define-private (get-current-ts)
-  (let ((info (unwrap! (get-stacks-block-info? time stacks-block-height) (err ERR_VOTING_EXPIRED))))
-    (ok info)))
+;; (define-private (get-current-ts)
+;;   (let ((info (unwrap! (get-stacks-block-info? time stacks-block-height) (err ERR_VOTING_EXPIRED))))
+;;     (ok info)))

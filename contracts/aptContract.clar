@@ -2,6 +2,7 @@
 
 (define-fungible-token TestStx u100000000000000)
 
+
 (define-data-var tokenAdmin principal tx-sender)
 
 (define-data-var token-uri (optional (string-utf8 30)) none)  ;; Storage for URI
@@ -20,9 +21,10 @@
   (ok (ft-get-balance TestStx account))
 )
 
-(define-public (mint (amount uint) (recipient principal))
+(define-public (mint (amount uint) (recipient principal) (nft-id uint))
   (begin
     (asserts! (is-eq tx-sender (var-get tokenAdmin)) (err u3))
+    (is-ok (contract-call? .nft get-owner nft-id)) ;;nft-id must be fixed according to the asset so make it constant //nft get-ower must have assert! to check if the tx-sender is owner
     (ft-mint? TestStx amount recipient)
   )
 )

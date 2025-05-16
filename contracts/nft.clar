@@ -21,6 +21,7 @@
 (define-constant ERR-NOT-TOKEN-OWNER (err u101))
 
 
+
 ;; data vars
 ;;
 (define-data-var last-token-id uint u0)
@@ -38,14 +39,14 @@
     )
 )
 
-(define-public (mint (recipient principal)) 
+(define-public (mint (recipient principal) (a-id uint)) 
     (let 
         (
             (token-id (+ (var-get last-token-id) u1))
             
         ) 
         (asserts! (is-eq tx-sender contract-owner) ERR-OWNER-ONLY)
-    
+        (is-ok (is-true recipient a-id))
         (try! (nft-mint? RWA token-id recipient))
         (var-set last-token-id token-id)
         (ok token-id)
@@ -70,4 +71,8 @@
 
 ;; private functions
 ;;
-
+(define-private (is-true (recipient principal) (a-id uint)) 
+    (let ((assest (unwrap! (contract-call? .rws get-asset recipient a-id) (err 909)))) 
+        (ok (get processCompleted assest))
+    )
+)
