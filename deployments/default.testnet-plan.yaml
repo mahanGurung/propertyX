@@ -1,0 +1,77 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://stacks-node-api.testnet.stacks.co"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - requirement-publish:
+            contract-id: ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.nft-trait
+            remap-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            remap-principals:
+              ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 4670
+            path: "./.cache/requirements/ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.nft-trait.clar"
+            clarity-version: 3
+        - requirement-publish:
+            contract-id: ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard
+            remap-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            remap-principals:
+              ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 8390
+            path: "./.cache/requirements/ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard.clar"
+            clarity-version: 3
+        - requirement-publish:
+            contract-id: ST1VZ3YGJKKC8JSSWMS4EZDXXJM7QWRBEZ0ZWM64E.sip-010-trait-ft-standard
+            remap-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            remap-principals:
+              ST1VZ3YGJKKC8JSSWMS4EZDXXJM7QWRBEZ0ZWM64E: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 8400
+            path: "./.cache/requirements/ST1VZ3YGJKKC8JSSWMS4EZDXXJM7QWRBEZ0ZWM64E.sip-010-trait-ft-standard.clar"
+            clarity-version: 3
+        - contract-publish:
+            contract-name: real-World-Asset-Trait
+            expected-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 926
+            path: contracts/real-World-Asset-Trait.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: rws
+            expected-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 8374
+            path: contracts/rws.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: nft
+            expected-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 1568
+            path: contracts/nft.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: aptContract
+            expected-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 1388
+            path: contracts/aptContract.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: nft-prototype
+            expected-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 5784
+            path: contracts/nft-prototype.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: rws-prototype
+            expected-sender: ST3J2W25Q2ZTATPHNABSMG74YZDGRS0PFYB5Z5J4K
+            cost: 2936
+            path: contracts/rws-prototype.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.1"
